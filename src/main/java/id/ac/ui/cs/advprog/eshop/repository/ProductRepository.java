@@ -49,7 +49,7 @@ public class ProductRepository {
         if (quantity == null || quantity < 0) {
             quantity = 0;
         }
-        exists.setProductQuantity(edited.getProductQuantity());
+        exists.setProductQuantity(quantity);
         return exists;
     }
 

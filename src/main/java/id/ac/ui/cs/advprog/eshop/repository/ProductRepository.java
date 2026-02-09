@@ -70,7 +70,7 @@ public class ProductRepository {
         return String.valueOf(max+1);
     }
 
-    public boolean delete(String productId) {
+    public boolean deleteProduct(String productId) {
         Iterator<Product> it = productData.iterator();
         while (it.hasNext()) {
             Product p = it.next();

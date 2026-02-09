@@ -52,3 +52,35 @@ dependencies {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
+
+sourceSets {
+    create("functionalTest") {
+        java.srcDir("src/functionalTest/java")
+        resources.srcDir("src/functionalTest/resources")
+
+        compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations.named("functionalTestImplementation") {
+    extendsFrom(configurations.getByName("testImplementation"))
+}
+configurations.named("functionalTestRuntimeOnly") {
+    extendsFrom(configurations.getByName("testRuntimeOnly"))
+}
+
+tasks.register<Test>("functionalTest") {
+    description = "Runs functional tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["functionalTest"].output.classesDirs
+    classpath = sourceSets["functionalTest"].runtimeClasspath
+
+    useJUnitPlatform()
+    shouldRunAfter(tasks.named("test"))
+}
+
+tasks.named("check") {
+    dependsOn(tasks.named("functionalTest"))
+}

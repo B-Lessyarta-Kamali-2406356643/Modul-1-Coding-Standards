@@ -2,7 +2,9 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
+
 
 group = "id.ac.ui.cs.advprog"
 version = "0.0.1-SNAPSHOT"
@@ -83,4 +85,15 @@ tasks.register<Test>("functionalTest") {
 
 tasks.named("check") {
     dependsOn(tasks.named("functionalTest"))
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.named("test"), tasks.named("functionalTest"))
+    executionData.setFrom(fileTree(layout.buildDirectory.asFile.get()) {
+        include("jacoco/*.exec")
+    })
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }

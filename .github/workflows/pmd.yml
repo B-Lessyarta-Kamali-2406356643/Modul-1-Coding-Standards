@@ -1,0 +1,27 @@
+name: PMD Code Analysis
+
+on:
+  push:
+
+jobs:
+  pmd:
+    name: Run PMD
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out the Git repository
+        uses: actions/checkout@v4
+      - name: Set up Java toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "gradle"
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Run PMD (PMD 7.0.0-rc4)
+        uses: pmd/pmd-github-action@v2
+        with:
+          version: "7.0.0-rc4"
+          sourcePath: "src/main/java"
+          rulesets: "rulesets/java/quickstart.xml"
+          analyzeModifiedFilesOnly: false

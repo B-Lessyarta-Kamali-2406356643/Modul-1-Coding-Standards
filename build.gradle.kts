@@ -97,3 +97,15 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 }
+
+tasks.test {
+    filter {
+        excludeTestsMatching("*FunctionalTest")
+    }
+
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}

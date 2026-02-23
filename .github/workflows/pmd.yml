@@ -24,3 +24,4 @@ jobs:
           version: "7.0.0-rc4"
           sourcePath: "src/main/java"
           rulesets: "rulesets/java/quickstart.xml"
+          analyzeModifiedFilesOnly: false

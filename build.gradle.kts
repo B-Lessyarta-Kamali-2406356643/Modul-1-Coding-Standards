@@ -88,10 +88,11 @@ tasks.named("check") {
 }
 
 tasks.named<JacocoReport>("jacocoTestReport") {
-    dependsOn(tasks.named("test"), tasks.named("functionalTest"))
+    dependsOn(tasks.test)
     executionData.setFrom(fileTree(layout.buildDirectory.asFile.get()) {
-        include("jacoco/*.exec")
+        include("jacoco/test.exec")
     })
+
     reports {
         xml.required.set(true)
         html.required.set(true)
@@ -104,8 +105,4 @@ tasks.test {
     }
 
     finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
 }

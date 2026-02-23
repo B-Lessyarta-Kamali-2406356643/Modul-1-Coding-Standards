@@ -57,3 +57,18 @@ Selain itu, penamaan variabel dan hard-coded selector juga bisa membuat test rap
 Perbaikan yang bisa dilakukan agar lebih bersih adalah melakukan refactor dengan membuat kelas dasar/utility untuk shared setup, 
 misalnya BaseFunctionalTest yang menyimpan serverPort, testBaseUrl, baseUrl, serta method helper seperti openCreatePage(), openListPage(), dan helper untuk mengisi form. 
 Dengan begitu test suite baru tinggal fokus pada skenario yang diuji (misalnya menghitung jumlah item) tanpa mengulang boilerplate yang sama.
+
+# Module 2 Reflection
+1. Code quality issues yang diperbaiki + strategi
+Selama exercise, saya menambahkan PMD sebagai tool code analysis dan menemukan beberapa isu sederhana tapi penting terkait kebersihan kode. 
+Isu yang saya perbaiki adalah penggunaan modifier public yang redundant pada method di ProductService (karena method dalam interface sudah otomatis public) dan adanya wildcard import yang tidak dipakai di ProductController (unused import). 
+Strategi saya adalah memprioritaskan perbaikan yang tidak mengubah behavior aplikasi, hanya memperbaiki readability dan maintainability. 
+Saya juga memastikan setiap perbaikan dilakukan dalam commit terpisah agar perubahan mudah ditinjau, lalu memverifikasi hasilnya dengan menjalankan ulang workflow PMD untuk memastikan isu yang sama tidak muncul lagi. 
+
+2. Apakah sudah memenuhi definisi CI dan CD (min. 3 kalimat)
+Menurut saya implementasi saat ini sudah memenuhi definisi Continuous Integration karena setiap push dan pull request otomatis memicu workflow GitHub Actions untuk menjalankan unit tests dan memeriksa kualitas kode (CI), sehingga integrasi perubahan bisa cepat terdeteksi jika ada kegagalan. 
+Selain itu, pipeline juga memenuhi aspek Continuous Deployment/Delivery karena codebase saya di-deploy ke Koyeb sehingga perubahan pada branch yang dideploy dapat menghasilkan versi aplikasi yang bisa diakses publik melalui URL. 
+Walaupun deployment bisa dianggap “continuous” ketika dilakukan otomatis pada perubahan branch yang terhubung, tetap penting untuk memastikan konfigurasi health check dan port sudah benar agar rilis stabil dan tidak hanya sekadar berhasil build. 
+Dengan adanya workflow test dan code analysis sebelum deploy, risiko bug yang masuk ke environment produksi menjadi lebih kecil.
+
+URL Deployment: https://rival-lucina-b-lessyartakamali-2406356643-fc9d62f5.koyeb.app

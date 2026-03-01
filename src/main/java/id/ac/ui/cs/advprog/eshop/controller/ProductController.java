@@ -1,7 +1,10 @@
 package id.ac.ui.cs.advprog.eshop.controller;
 
 import id.ac.ui.cs.advprog.eshop.model.Product;
+import id.ac.ui.cs.advprog.eshop.model.Car;
 import id.ac.ui.cs.advprog.eshop.service.ProductService;
+import id.ac.ui.cs.advprog.eshop.service.CarServiceImpl;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,17 +43,15 @@ public class ProductController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editProductPage(@PathVariable("id") String id, Model model) {
-        Product exists = service.findById(id);
-        if (exists == null) {
-            return "redirect:/product/list";
-        }
-        model.addAttribute("product", exists);
+    public String editProductPage(@PathVariable String productId, Model model) {
+        Product product = service.findById(productId);
+        model.addAttribute("product", product);
         return "editProduct";
     }
 
     @PostMapping("/edit/{id}")
     public String editProductPost(@PathVariable("id") String id, @ModelAttribute Product product) {
+        System.out.println(product.getProductId() );
         service.editProduct(id, product);
         return "redirect:/product/list";
     }
@@ -59,5 +60,33 @@ public class ProductController {
     public String deleteProductPost(@PathVariable("id") String id) {
         service.deleteProduct(id);
         return "redirect:/product/list";
+    }
+}
+
+@Controller
+@RequestMapping("/car")
+class CarController extends ProductController {
+
+    @Autowired
+    private CarServiceImpl carService;
+
+    @GetMapping("/createCar")
+    public String createCarPage(Model model) {
+        Car car = new Car();
+        model.addAttribute("car", car);
+        return "createCar";
+    }
+
+    @PostMapping("/createCar")
+    public String createCarPost(@ModelAttribute Car car, Model model) {
+        carService.create(car);
+        return "redirect:/car/listCar";
+    }
+
+    @GetMapping("/listCar")
+    public String carListPage(Model model) {
+        List<Car> allCars = carService.findAll();
+        model.addAttribute("cars", allCars);
+        return "carList";
     }
 }

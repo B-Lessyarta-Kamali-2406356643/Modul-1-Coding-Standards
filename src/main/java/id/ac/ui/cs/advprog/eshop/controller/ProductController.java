@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import java.util.List;
 
 @Controller
@@ -43,8 +44,8 @@ public class ProductController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editProductPage(@PathVariable String productId, Model model) {
-        Product product = service.findById(productId);
+    public String editProductPage(@PathVariable("id") String id, Model model) {
+        Product product = service.findById(id);
         model.addAttribute("product", product);
         return "editProduct";
     }
@@ -65,8 +66,7 @@ public class ProductController {
 
 @Controller
 @RequestMapping("/car")
-class CarController extends ProductController {
-
+class CarController {
     @Autowired
     private CarServiceImpl carService;
 
@@ -88,5 +88,24 @@ class CarController extends ProductController {
         List<Car> allCars = carService.findAll();
         model.addAttribute("cars", allCars);
         return "carList";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editCarPage(@PathVariable String id, Model model) {
+        Car car = carService.findById(id);
+        model.addAttribute("car", car);
+        return "editCar";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String editCarPost(@PathVariable String id, @ModelAttribute Car car) {
+        carService.update(id, car);
+        return "redirect:/car/listCar";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteCarPost(@PathVariable("id") String id) {
+        carService.deleteCarById(id);
+        return "redirect:/car/listCar";
     }
 }

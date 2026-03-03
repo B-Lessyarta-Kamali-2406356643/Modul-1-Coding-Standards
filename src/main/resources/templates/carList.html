@@ -15,9 +15,8 @@
         <thead>
         <tr>
             <th scope="col">Car Name</th>
-            <th scope="col">Quasntity</th>
+            <th scope="col">Quantity</th>
             <th scope="col">Color</th>
-            <th scope="col">Price</th>
             <th scope="col">Actions</th>
         </tr>
         </thead>
@@ -26,7 +25,6 @@
             <td th:text="${car.carName}"></td>
             <td th:text="${car.carQuantity}"></td>
             <td th:text="${car.carColor}"></td>
-            <td th:text="${car.carPrice}"></td>
 
             <td class="d-flex gap-2">
                 <a th:href="@{/car/edit/{id}(id=${car.carId})}" class="btn btn-info btn-sm">Edit</a>

@@ -1,4 +1,4 @@
-package enums;
+package id.ac.ui.cs.advprog.eshop.enums;
 
 import lombok.Getter;
 
@@ -11,7 +11,7 @@ public enum OrderStatus {
 
     private final String value;
 
-    private OrderStatus(String value) {
+    OrderStatus(String value) {
         this.value = value;
     }
 

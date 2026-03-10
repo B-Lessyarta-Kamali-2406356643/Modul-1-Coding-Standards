@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Created</title>
+</head>
+<body>
+<h1>Payment Created</h1>
+<p th:text="'Payment ID: ' + ${payment.id}"></p>
+<p th:text="'Method: ' + ${payment.method}"></p>
+<p th:text="'Status: ' + ${payment.status}"></p>
+</body>
+</html>

@@ -17,6 +17,9 @@ import java.util.Map;
 @RequestMapping("/order")
 public class OrderController {
 
+    private static final String VOUCHER = "VOUCHER_CODE";
+    private static final String COD = "CASH_ON_DELIVERY";
+
     @Autowired
     private OrderService orderService;
 
@@ -56,18 +59,26 @@ public class OrderController {
                            @RequestParam(value = "deliveryFee", required = false) String deliveryFee,
                            Model model) {
         Order order = orderService.findById(orderId);
-
-        Map<String, String> paymentData = new HashMap<>();
-
-        if ("VOUCHER_CODE".equals(method)) {
-            paymentData.put("voucherCode", voucherCode);
-        } else if ("CASH_ON_DELIVERY".equals(method)) {
-            paymentData.put("address", address);
-            paymentData.put("deliveryFee", deliveryFee);
-        }
+        Map<String, String> paymentData = buildPaymentData(method, voucherCode, address, deliveryFee);
 
         Payment payment = paymentService.addPayment(order, method, paymentData);
         model.addAttribute("payment", payment);
         return "paymentCreated";
+    }
+
+    private Map<String, String> buildPaymentData(String method,
+                                                 String voucherCode,
+                                                 String address,
+                                                 String deliveryFee) {
+        Map<String, String> paymentData = new HashMap<>();
+
+        if (VOUCHER.equals(method)) {
+            paymentData.put("voucherCode", voucherCode);
+        } else if (COD.equals(method)) {
+            paymentData.put("address", address);
+            paymentData.put("deliveryFee", deliveryFee);
+        }
+
+        return paymentData;
     }
 }

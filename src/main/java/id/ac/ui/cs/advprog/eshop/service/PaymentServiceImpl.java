@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -34,12 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Unsupported payment method");
         }
 
-        if (SUCCESS.equals(payment.getStatus())) {
-            order.setStatus(OrderStatus.SUCCESS.getValue());
-        } else if (REJECTED.equals(payment.getStatus())) {
-            order.setStatus(OrderStatus.FAILED.getValue());
-        }
-
+        syncOrderStatus(payment);
         paymentRepository.save(payment);
         return payment;
     }
@@ -51,13 +45,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         payment.setStatus(status);
-
-        if (SUCCESS.equals(status)) {
-            payment.getOrder().setStatus(OrderStatus.SUCCESS.getValue());
-        } else {
-            payment.getOrder().setStatus(OrderStatus.FAILED.getValue());
-        }
-
+        syncOrderStatus(payment);
         paymentRepository.save(payment);
         return payment;
     }
@@ -70,6 +58,14 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
+    }
+
+    private void syncOrderStatus(Payment payment) {
+        if (SUCCESS.equals(payment.getStatus())) {
+            payment.getOrder().setStatus(OrderStatus.SUCCESS.getValue());
+        } else if (REJECTED.equals(payment.getStatus())) {
+            payment.getOrder().setStatus(OrderStatus.FAILED.getValue());
+        }
     }
 
     private boolean validateVoucher(Map<String, String> paymentData) {

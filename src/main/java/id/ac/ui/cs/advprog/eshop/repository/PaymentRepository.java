@@ -8,12 +8,12 @@ import java.util.List;
 
 @Repository
 public class PaymentRepository {
+
     private final List<Payment> paymentData = new ArrayList<>();
 
     public Payment save(Payment payment) {
         for (int i = 0; i < paymentData.size(); i++) {
-            Payment savedPayment = paymentData.get(i);
-            if (savedPayment.getId().equals(payment.getId())) {
+            if (paymentData.get(i).getId().equals(payment.getId())) {
                 paymentData.set(i, payment);
                 return payment;
             }
@@ -22,10 +22,10 @@ public class PaymentRepository {
         return payment;
     }
 
-    public Payment findById(String paymentId) {
-        for (Payment savedPayment : paymentData) {
-            if (savedPayment.getId().equals(paymentId)) {
-                return savedPayment;
+    public Payment findById(String id) {
+        for (Payment payment : paymentData) {
+            if (payment.getId().equals(id)) {
+                return payment;
             }
         }
         return null;

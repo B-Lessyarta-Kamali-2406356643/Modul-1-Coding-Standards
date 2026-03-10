@@ -2,113 +2,156 @@ package id.ac.ui.cs.advprog.eshop.service;
 
 import id.ac.ui.cs.advprog.eshop.model.Product;
 import id.ac.ui.cs.advprog.eshop.repository.ProductRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
 
-    private ProductServiceImpl productService;
-    private ProductRepository productRepository;
+    @InjectMocks
+    ProductServiceImpl productService;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        productService = new ProductServiceImpl();
-        productRepository = mock(ProductRepository.class);
+    @Mock
+    ProductRepository productRepository;
 
-        // inject mock into @Autowired field without changing production code
-        Field repoField = ProductServiceImpl.class.getDeclaredField("productRepository");
-        repoField.setAccessible(true);
-        repoField.set(productService, productRepository);
+    @Test
+    void testCreate() {
+        Product product = new Product();
+        product.setProductId("1");
+        product.setProductName("Sampo");
+        product.setProductQuantity(2);
+
+        doReturn(product).when(productRepository).create(product);
+
+        Product result = productService.create(product);
+
+        assertEquals(product.getProductId(), result.getProductId());
+        verify(productRepository, times(1)).create(product);
     }
 
     @Test
-    void create_callsRepository_andReturnsSameProduct() {
-        Product p = new Product();
-        p.setProductId("1");
-        p.setProductName("A");
-        p.setProductQuantity(10);
+    void testFindAllIfEmpty() {
+        Iterator<Product> iterator = Collections.<Product>emptyList().iterator();
+        doReturn(iterator).when(productRepository).findAll();
 
-        Product result = productService.create(p);
+        List<Product> result = productService.findAll();
 
-        assertSame(p, result);
-        verify(productRepository).create(p);
-        verifyNoMoreInteractions(productRepository);
+        assertTrue(result.isEmpty());
+        verify(productRepository, times(1)).findAll();
     }
 
     @Test
-    void findAll_returnsListFromIterator() {
-        Product p1 = new Product();
-        p1.setProductId("1");
-        Product p2 = new Product();
-        p2.setProductId("2");
+    void testFindAllIfNotEmpty() {
+        Product product1 = new Product();
+        product1.setProductId("1");
+        product1.setProductName("A");
+        product1.setProductQuantity(1);
 
-        Iterator<Product> it = List.of(p1, p2).iterator();
-        when(productRepository.findAll()).thenReturn(it);
+        Product product2 = new Product();
+        product2.setProductId("2");
+        product2.setProductName("B");
+        product2.setProductQuantity(2);
+
+        Iterator<Product> iterator = Arrays.asList(product1, product2).iterator();
+        doReturn(iterator).when(productRepository).findAll();
 
         List<Product> result = productService.findAll();
 
         assertEquals(2, result.size());
-        assertSame(p1, result.get(0));
-        assertSame(p2, result.get(1));
-        verify(productRepository).findAll();
-        verifyNoMoreInteractions(productRepository);
+        assertEquals("1", result.get(0).getProductId());
+        assertEquals("2", result.get(1).getProductId());
+        verify(productRepository, times(1)).findAll();
     }
 
     @Test
-    void findAll_whenEmptyIterator_returnsEmptyList() {
-        when(productRepository.findAll()).thenReturn(List.<Product>of().iterator());
+    void testFindByIdFound() {
+        Product product = new Product();
+        product.setProductId("1");
+        product.setProductName("A");
+        product.setProductQuantity(1);
 
-        List<Product> result = productService.findAll();
+        doReturn(product).when(productRepository).findById("1");
+
+        Product result = productService.findById("1");
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(productRepository).findAll();
-        verifyNoMoreInteractions(productRepository);
+        assertEquals("1", result.getProductId());
+        verify(productRepository, times(1)).findById("1");
     }
 
     @Test
-    void findById_delegatesToRepository() {
-        Product p = new Product();
-        p.setProductId("42");
+    void testFindByIdNotFound() {
+        doReturn(null).when(productRepository).findById("999");
 
-        when(productRepository.findById("42")).thenReturn(p);
+        Product result = productService.findById("999");
 
-        Product result = productService.findById("42");
-
-        assertSame(p, result);
-        verify(productRepository).findById("42");
-        verifyNoMoreInteractions(productRepository);
+        assertNull(result);
+        verify(productRepository, times(1)).findById("999");
     }
 
     @Test
-    void editProduct_delegatesToRepository() {
+    void testEditProductFound() {
         Product edited = new Product();
         edited.setProductName("Updated");
+        edited.setProductQuantity(10);
 
-        when(productRepository.edit("9", edited)).thenReturn(edited);
+        Product resultProduct = new Product();
+        resultProduct.setProductId("1");
+        resultProduct.setProductName("Updated");
+        resultProduct.setProductQuantity(10);
 
-        Product result = productService.editProduct("9", edited);
+        doReturn(resultProduct).when(productRepository).edit("1", edited);
 
-        assertSame(edited, result);
-        verify(productRepository).edit("9", edited);
-        verifyNoMoreInteractions(productRepository);
+        Product result = productService.editProduct("1", edited);
+
+        assertNotNull(result);
+        assertEquals("Updated", result.getProductName());
+        assertEquals(10, result.getProductQuantity());
+        verify(productRepository, times(1)).edit("1", edited);
     }
 
     @Test
-    void deleteProduct_delegatesToRepository() {
-        when(productRepository.deleteProduct("1")).thenReturn(true);
+    void testEditProductNotFound() {
+        Product edited = new Product();
+        edited.setProductName("Updated");
+        edited.setProductQuantity(10);
+
+        doReturn(null).when(productRepository).edit("999", edited);
+
+        Product result = productService.editProduct("999", edited);
+
+        assertNull(result);
+        verify(productRepository, times(1)).edit("999", edited);
+    }
+
+    @Test
+    void testDeleteProductSuccess() {
+        doReturn(true).when(productRepository).deleteProduct("1");
 
         boolean result = productService.deleteProduct("1");
 
         assertTrue(result);
-        verify(productRepository).deleteProduct("1");
-        verifyNoMoreInteractions(productRepository);
+        verify(productRepository, times(1)).deleteProduct("1");
+    }
+
+    @Test
+    void testDeleteProductNotFound() {
+        doReturn(false).when(productRepository).deleteProduct("999");
+
+        boolean result = productService.deleteProduct("999");
+
+        assertFalse(result);
+        verify(productRepository, times(1)).deleteProduct("999");
     }
 }

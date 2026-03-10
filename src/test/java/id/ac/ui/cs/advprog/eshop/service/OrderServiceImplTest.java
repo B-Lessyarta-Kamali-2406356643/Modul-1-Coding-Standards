@@ -3,13 +3,13 @@ package id.ac.ui.cs.advprog.eshop.service;
 import id.ac.ui.cs.advprog.eshop.enums.OrderStatus;
 import id.ac.ui.cs.advprog.eshop.model.Order;
 import id.ac.ui.cs.advprog.eshop.model.Product;
+import id.ac.ui.cs.advprog.eshop.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import id.ac.ui.cs.advprog.eshop.repository.OrderRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +51,12 @@ class OrderServiceImplTest {
     @Test
     void testCreateOrder() {
         Order order = orders.get(1);
+        doReturn(null).when(orderRepository).findById(order.getId());
         doReturn(order).when(orderRepository).save(order);
 
         Order result = orderService.createOrder(order);
+
+        verify(orderRepository, times(1)).findById(order.getId());
         verify(orderRepository, times(1)).save(order);
         assertEquals(order.getId(), result.getId());
     }
@@ -63,8 +66,11 @@ class OrderServiceImplTest {
         Order order = orders.get(1);
         doReturn(order).when(orderRepository).findById(order.getId());
 
-        assertNull(orderService.createOrder(order));
-        verify(orderRepository, times(0)).save(order);
+        Order result = orderService.createOrder(order);
+
+        assertNull(result);
+        verify(orderRepository, times(1)).findById(order.getId());
+        verify(orderRepository, never()).save(order);
     }
 
     @Test
@@ -72,6 +78,7 @@ class OrderServiceImplTest {
         Order order = orders.get(1);
         Order newOrder = new Order(order.getId(), order.getProducts(), order.getOrderTime(),
                 order.getAuthor(), OrderStatus.SUCCESS.getValue());
+
         doReturn(order).when(orderRepository).findById(order.getId());
         doReturn(newOrder).when(orderRepository).save(any(Order.class));
 
@@ -79,6 +86,7 @@ class OrderServiceImplTest {
 
         assertEquals(order.getId(), result.getId());
         assertEquals(OrderStatus.SUCCESS.getValue(), result.getStatus());
+        verify(orderRepository, times(1)).findById(order.getId());
         verify(orderRepository, times(1)).save(any(Order.class));
     }
 
@@ -90,7 +98,8 @@ class OrderServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> orderService.updateStatus(order.getId(), "MEOW"));
 
-        verify(orderRepository, times(0)).save(any(Order.class));
+        verify(orderRepository, times(1)).findById(order.getId());
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
@@ -100,7 +109,8 @@ class OrderServiceImplTest {
         assertThrows(NoSuchElementException.class,
                 () -> orderService.updateStatus("zczc", OrderStatus.SUCCESS.getValue()));
 
-        verify(orderRepository, times(0)).save(any(Order.class));
+        verify(orderRepository, times(1)).findById("zczc");
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
     @Test
@@ -109,13 +119,19 @@ class OrderServiceImplTest {
         doReturn(order).when(orderRepository).findById(order.getId());
 
         Order result = orderService.findById(order.getId());
+
         assertEquals(order.getId(), result.getId());
+        verify(orderRepository, times(1)).findById(order.getId());
     }
 
     @Test
     void testFindByIdIfIdNotFound() {
         doReturn(null).when(orderRepository).findById("zczc");
-        assertNull(orderService.findById("zczc"));
+
+        Order result = orderService.findById("zczc");
+
+        assertNull(result);
+        verify(orderRepository, times(1)).findById("zczc");
     }
 
     @Test
@@ -124,10 +140,9 @@ class OrderServiceImplTest {
         doReturn(orders).when(orderRepository).findAllByAuthor(order.getAuthor());
 
         List<Order> results = orderService.findAllByAuthor(order.getAuthor());
-        for (Order result : results) {
-            assertEquals(order.getAuthor(), result.getAuthor());
-        }
+
         assertEquals(2, results.size());
+        verify(orderRepository, times(1)).findAllByAuthor(order.getAuthor());
     }
 
     @Test
@@ -136,8 +151,9 @@ class OrderServiceImplTest {
         doReturn(new ArrayList<Order>()).when(orderRepository)
                 .findAllByAuthor(order.getAuthor().toLowerCase());
 
-        List<Order> results = orderService.findAllByAuthor(
-                order.getAuthor().toLowerCase());
+        List<Order> results = orderService.findAllByAuthor(order.getAuthor().toLowerCase());
+
         assertTrue(results.isEmpty());
+        verify(orderRepository, times(1)).findAllByAuthor(order.getAuthor().toLowerCase());
     }
 }

@@ -79,7 +79,8 @@ class PaymentControllerTest {
         mockMvc.perform(get("/payment/admin/list"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("paymentAdminList"))
-                .andExpect(model().attributeExists("payments"));
+                .andExpect(model().attributeExists("payments"))
+                .andExpect(model().attribute("payments", payments));
     }
 
     @Test
@@ -89,11 +90,12 @@ class PaymentControllerTest {
         mockMvc.perform(get("/payment/admin/detail/" + payment.getId()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("paymentAdminDetail"))
-                .andExpect(model().attributeExists("payment"));
+                .andExpect(model().attributeExists("payment"))
+                .andExpect(model().attribute("payment", payment));
     }
 
     @Test
-    void testPostAdminSetStatus() throws Exception {
+    void testPostAdminSetStatusRejected() throws Exception {
         Payment updatedPayment = payment;
         updatedPayment.setStatus("REJECTED");
 
@@ -104,6 +106,23 @@ class PaymentControllerTest {
                         .param("status", "REJECTED"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("paymentAdminDetail"))
-                .andExpect(model().attributeExists("payment"));
+                .andExpect(model().attributeExists("payment"))
+                .andExpect(model().attribute("payment", updatedPayment));
+    }
+
+    @Test
+    void testPostAdminSetStatusSuccess() throws Exception {
+        Payment updatedPayment = payment;
+        updatedPayment.setStatus("SUCCESS");
+
+        doReturn(payment).when(paymentService).getPayment(payment.getId());
+        doReturn(updatedPayment).when(paymentService).setStatus(payment, "SUCCESS");
+
+        mockMvc.perform(post("/payment/admin/set-status/" + payment.getId())
+                        .param("status", "SUCCESS"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("paymentAdminDetail"))
+                .andExpect(model().attributeExists("payment"))
+                .andExpect(model().attribute("payment", updatedPayment));
     }
 }

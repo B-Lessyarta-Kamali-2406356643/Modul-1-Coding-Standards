@@ -18,7 +18,6 @@ class ProductRepositoryTest {
         productRepository.productData.clear();
     }
 
-
     @Test
     void testFindAllIfEmpty() {
         Iterator<Product> it = productRepository.findAll();
@@ -26,7 +25,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testCreateAndFindAll_Single() {
+    void testCreateAndFindAllSingle() {
         Product p = new Product();
         p.setProductId("id-1");
         p.setProductName("A");
@@ -65,9 +64,8 @@ class ProductRepositoryTest {
         assertFalse(it.hasNext());
     }
 
-
     @Test
-    void testCreate_GenerateIdWhenNull() {
+    void testCreateGenerateIdWhenNull() {
         Product existing = new Product();
         existing.setProductId("1");
         existing.setProductName("X");
@@ -87,7 +85,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testCreate_GenerateIdWhenBlank() {
+    void testCreateGenerateIdWhenBlank() {
         Product existing = new Product();
         existing.setProductId("10");
         existing.setProductName("X");
@@ -105,7 +103,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testCreate_NegativeQuantityBecomesZero() {
+    void testCreateNegativeQuantityBecomesZero() {
         Product p = new Product();
         p.setProductId("id-1");
         p.setProductName("Neg");
@@ -117,7 +115,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testCreate_NullQuantityDoesNotChange() {
+    void testCreateNullQuantityDoesNotChange() {
         Product p = new Product();
         p.setProductId("id-1");
         p.setProductName("NullQty");
@@ -128,9 +126,8 @@ class ProductRepositoryTest {
         assertNull(created.getProductQuantity());
     }
 
-
     @Test
-    void testFindById_Found() {
+    void testFindByIdFound() {
         Product p = new Product();
         p.setProductId("42");
         p.setProductName("FindMe");
@@ -143,7 +140,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testFindById_NotFound() {
+    void testFindByIdNotFound() {
         Product p = new Product();
         p.setProductId("1");
         p.setProductName("A");
@@ -154,8 +151,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testFindById_SkipsNullIdInList() {
-
+    void testFindByIdSkipsNullIdInList() {
         Product nullId = new Product();
         nullId.setProductId(null);
         nullId.setProductName("NullId");
@@ -165,9 +161,8 @@ class ProductRepositoryTest {
         assertNull(productRepository.findById("anything"));
     }
 
-
     @Test
-    void testEdit_ReturnsNullIfNotExists() {
+    void testEditReturnsNullIfNotExists() {
         Product edited = new Product();
         edited.setProductName("New");
         edited.setProductQuantity(5);
@@ -176,7 +171,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testEdit_UpdatesNameAndQuantity_Positive() {
+    void testEditUpdatesNameAndQuantityPositive() {
         Product p = new Product();
         p.setProductId("9");
         p.setProductName("Old");
@@ -195,7 +190,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testEdit_QuantityNullBecomesZero() {
+    void testEditQuantityNullBecomesZero() {
         Product p = new Product();
         p.setProductId("9");
         p.setProductName("Old");
@@ -213,7 +208,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testEdit_QuantityNegativeBecomesZero() {
+    void testEditQuantityNegativeBecomesZero() {
         Product p = new Product();
         p.setProductId("9");
         p.setProductName("Old");
@@ -230,14 +225,13 @@ class ProductRepositoryTest {
         assertEquals(0, result.getProductQuantity());
     }
 
-
     @Test
-    void testGenerateId_EmptyListReturns1() {
+    void testGenerateIdEmptyListReturns1() {
         assertEquals("1", productRepository.generateId());
     }
 
     @Test
-    void testGenerateId_IgnoresNullAndNonNumericIds() {
+    void testGenerateIdIgnoresNullAndNonNumericIds() {
         Product nullId = new Product();
         nullId.setProductId(null);
         productRepository.productData.add(nullId);
@@ -257,9 +251,8 @@ class ProductRepositoryTest {
         assertEquals("4", productRepository.generateId());
     }
 
-
     @Test
-    void testDeleteProduct_Success() {
+    void testDeleteProductSuccess() {
         Product p1 = new Product();
         p1.setProductId("1");
         p1.setProductName("A");
@@ -278,7 +271,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testDeleteProduct_NotFound() {
+    void testDeleteProductNotFound() {
         Product p = new Product();
         p.setProductId("5");
         p.setProductName("X");
@@ -290,7 +283,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    void testDeleteProduct_SkipsNullIdInList() {
+    void testDeleteProductSkipsNullIdInList() {
         Product nullId = new Product();
         nullId.setProductId(null);
         productRepository.productData.add(nullId);

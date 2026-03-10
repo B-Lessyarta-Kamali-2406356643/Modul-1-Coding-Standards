@@ -8,11 +8,14 @@ import id.ac.ui.cs.advprog.eshop.repository.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,145 +23,287 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
 
-    @InjectMocks
-    PaymentServiceImpl paymentService;
-
     @Mock
-    PaymentRepository paymentRepository;
+    private PaymentRepository paymentRepository;
 
-    Order order;
-    Map<String, String> validVoucherData;
-    Map<String, String> invalidVoucherData;
-    Map<String, String> validCodData;
-    Map<String, String> invalidCodData;
+    private PaymentServiceImpl paymentService;
+    private Order order;
 
     @BeforeEach
     void setUp() {
-        List<Product> products = new ArrayList<>();
+        paymentService = new PaymentServiceImpl();
+        ReflectionTestUtils.setField(paymentService, "paymentRepository", paymentRepository);
+
         Product product = new Product();
-        product.setProductId("1");
-        product.setProductName("Sampo");
-        product.setProductQuantity(2);
+        product.setProductId("product-1");
+        product.setProductName("Laptop");
+        product.setProductQuantity(1);
+
+        List<Product> products = new ArrayList<>();
         products.add(product);
 
-        order = new Order("order-1", products, 1708560000L, "Kamali");
-
-        validVoucherData = new HashMap<>();
-        validVoucherData.put("voucherCode", "ESHOP1234ABC5678");
-
-        invalidVoucherData = new HashMap<>();
-        invalidVoucherData.put("voucherCode", "SALAH");
-
-        validCodData = new HashMap<>();
-        validCodData.put("address", "Depok");
-        validCodData.put("deliveryFee", "15000");
-
-        invalidCodData = new HashMap<>();
-        invalidCodData.put("address", "");
-        invalidCodData.put("deliveryFee", "15000");
+        order = new Order("order-1", products, 10000L, "customer-1");
     }
 
     @Test
-    void testAddPaymentVoucherSuccess() {
-        Payment result = paymentService.addPayment(order, "VOUCHER_CODE", validVoucherData);
+    void testAddPaymentVoucherValid() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("voucherCode", "ESHOP1234ABC5678");
 
-        assertEquals("VOUCHER_CODE", result.getMethod());
-        assertEquals("SUCCESS", result.getStatus());
-        assertEquals(OrderStatus.SUCCESS.getValue(), order.getStatus());
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertNotNull(payment);
+        assertEquals("SUCCESS", payment.getStatus());
+        assertEquals(OrderStatus.SUCCESS.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
-    void testAddPaymentVoucherRejected() {
-        Payment result = paymentService.addPayment(order, "VOUCHER_CODE", invalidVoucherData);
+    void testAddPaymentVoucherNullPaymentData() {
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", null);
 
-        assertEquals("REJECTED", result.getStatus());
-        assertEquals(OrderStatus.FAILED.getValue(), order.getStatus());
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
-    void testAddPaymentCodSuccess() {
-        Payment result = paymentService.addPayment(order, "CASH_ON_DELIVERY", validCodData);
+    void testAddPaymentVoucherNullVoucherCode() {
+        Map<String, String> paymentData = new HashMap<>();
 
-        assertEquals("CASH_ON_DELIVERY", result.getMethod());
-        assertEquals("SUCCESS", result.getStatus());
-        assertEquals(OrderStatus.SUCCESS.getValue(), order.getStatus());
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
-    void testAddPaymentCodRejected() {
-        Payment result = paymentService.addPayment(order, "CASH_ON_DELIVERY", invalidCodData);
+    void testAddPaymentVoucherWrongLength() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("voucherCode", "ESHOP123");
 
-        assertEquals("REJECTED", result.getStatus());
-        assertEquals(OrderStatus.FAILED.getValue(), order.getStatus());
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
-    void testAddPaymentInvalidMethod() {
-        assertThrows(IllegalArgumentException.class,
-                () -> paymentService.addPayment(order, "BANK_TRANSFER", validVoucherData));
+    void testAddPaymentVoucherWrongPrefix() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("voucherCode", "ABCDE123ABC45678");
+
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentVoucherWrongDigitCount() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("voucherCode", "ESHOPABCDEFGH123");
+
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentCodValid() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("address", "Jl. Mawar No. 1");
+        paymentData.put("deliveryFee", "15000");
+
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", paymentData);
+
+        assertNotNull(payment);
+        assertEquals("SUCCESS", payment.getStatus());
+        assertEquals(OrderStatus.SUCCESS.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentCodNullPaymentData() {
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", null);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentCodBlankAddress() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("address", "   ");
+        paymentData.put("deliveryFee", "15000");
+
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentCodBlankDeliveryFee() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("address", "Jl. Mawar No. 1");
+        paymentData.put("deliveryFee", "   ");
+
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentUnsupportedMethod() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> paymentService.addPayment(order, "BANK_TRANSFER", new HashMap<>())
+        );
+
+        assertEquals("Unsupported payment method", exception.getMessage());
+        verify(paymentRepository, never()).save(any());
     }
 
     @Test
     void testSetStatusSuccess() {
-        Payment payment = new Payment(order, "VOUCHER_CODE", validVoucherData);
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", "ESHOP1234ABC5678");
+        Payment payment = new Payment(order, "VOUCHER_CODE", data);
 
         Payment result = paymentService.setStatus(payment, "SUCCESS");
 
+        assertSame(payment, result);
         assertEquals("SUCCESS", result.getStatus());
-        assertEquals(OrderStatus.SUCCESS.getValue(), payment.getOrder().getStatus());
-        verify(paymentRepository, times(1)).save(payment);
+        assertEquals(OrderStatus.SUCCESS.getValue(), result.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
     void testSetStatusRejected() {
-        Payment payment = new Payment(order, "VOUCHER_CODE", validVoucherData);
+        Map<String, String> data = new HashMap<>();
+        data.put("address", "Jl. Mawar No. 1");
+        data.put("deliveryFee", "15000");
+        Payment payment = new Payment(order, "CASH_ON_DELIVERY", data);
 
         Payment result = paymentService.setStatus(payment, "REJECTED");
 
+        assertSame(payment, result);
         assertEquals("REJECTED", result.getStatus());
-        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
-        verify(paymentRepository, times(1)).save(payment);
+        assertEquals(OrderStatus.FAILED.getValue(), result.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
     }
 
     @Test
     void testSetStatusInvalid() {
-        Payment payment = new Payment(order, "VOUCHER_CODE", validVoucherData);
+        Map<String, String> data = new HashMap<>();
+        data.put("address", "Jl. Mawar No. 1");
+        data.put("deliveryFee", "15000");
+        Payment payment = new Payment(order, "CASH_ON_DELIVERY", data);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> paymentService.setStatus(payment, "MEOW"));
-        verify(paymentRepository, never()).save(any(Payment.class));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> paymentService.setStatus(payment, "PENDING")
+        );
+
+        assertEquals("Invalid payment status", exception.getMessage());
+        verify(paymentRepository, never()).save(any());
     }
 
     @Test
-    void testGetPaymentFound() {
-        Payment payment = new Payment(order, "VOUCHER_CODE", validVoucherData);
-        doReturn(payment).when(paymentRepository).findById(payment.getId());
+    void testGetPayment() {
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", "ESHOP1234ABC5678");
+        Payment payment = new Payment(order, "VOUCHER_CODE", data);
 
-        Payment result = paymentService.getPayment(payment.getId());
+        when(paymentRepository.findById("payment-1")).thenReturn(payment);
 
-        assertNotNull(result);
-        assertEquals(payment.getId(), result.getId());
-    }
+        Payment result = paymentService.getPayment("payment-1");
 
-    @Test
-    void testGetPaymentNotFound() {
-        doReturn(null).when(paymentRepository).findById("xxx");
-        assertNull(paymentService.getPayment("xxx"));
+        assertSame(payment, result);
+        verify(paymentRepository).findById("payment-1");
     }
 
     @Test
     void testGetAllPayments() {
-        List<Payment> payments = new ArrayList<>();
-        payments.add(new Payment(order, "VOUCHER_CODE", validVoucherData));
-        payments.add(new Payment(order, "CASH_ON_DELIVERY", validCodData));
+        Map<String, String> data1 = new HashMap<>();
+        data1.put("voucherCode", "ESHOP1234ABC5678");
+        Payment payment1 = new Payment(order, "VOUCHER_CODE", data1);
 
-        doReturn(payments).when(paymentRepository).findAll();
+        Map<String, String> data2 = new HashMap<>();
+        data2.put("address", "Jl. Mawar No. 1");
+        data2.put("deliveryFee", "15000");
+        Payment payment2 = new Payment(order, "CASH_ON_DELIVERY", data2);
 
-        List<Payment> results = paymentService.getAllPayments();
-        assertEquals(2, results.size());
+        List<Payment> payments = List.of(payment1, payment2);
+        when(paymentRepository.findAll()).thenReturn(payments);
+
+        List<Payment> result = paymentService.getAllPayments();
+
+        assertEquals(2, result.size());
+        assertSame(payments, result);
+        verify(paymentRepository).findAll();
     }
+
+    @Test
+    void testAddPaymentCodNullAddress() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("deliveryFee", "15000");
+
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testAddPaymentCodNullDeliveryFee() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("address", "Jl. Mawar No. 1");
+
+        Payment payment = paymentService.addPayment(order, "CASH_ON_DELIVERY", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    void testSyncOrderStatusDoesNothingForOtherStatus() {
+        Map<String, String> data = new HashMap<>();
+        data.put("voucherCode", "ESHOP1234ABC5678");
+        Payment payment = new Payment(order, "VOUCHER_CODE", data);
+
+        ReflectionTestUtils.setField(payment, "status", "PENDING");
+
+        String oldStatus = order.getStatus();
+
+        ReflectionTestUtils.invokeMethod(paymentService, "syncOrderStatus", payment);
+
+        assertEquals(oldStatus, order.getStatus());
+    }
+
+    @Test
+    void testAddPaymentVoucherNoDigits() {
+        Map<String, String> paymentData = new HashMap<>();
+        paymentData.put("voucherCode", "ESHOPABCDEFGHIJK");
+
+        Payment payment = paymentService.addPayment(order, "VOUCHER_CODE", paymentData);
+
+        assertEquals("REJECTED", payment.getStatus());
+        assertEquals(OrderStatus.FAILED.getValue(), payment.getOrder().getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+
 }

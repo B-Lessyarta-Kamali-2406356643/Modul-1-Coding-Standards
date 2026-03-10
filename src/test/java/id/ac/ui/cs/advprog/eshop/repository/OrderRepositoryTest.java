@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderRepositoryTest {
-    // setUp for the OrderRepositoryTest
+
     OrderRepository orderRepository;
     List<Order> orders;
 
@@ -41,7 +41,6 @@ class OrderRepositoryTest {
         orders.add(order3);
     }
 
-    // happy path test: Use save to add new Order
     @Test
     void testSaveCreate() {
         Order order = orders.get(1);
@@ -55,7 +54,6 @@ class OrderRepositoryTest {
         assertEquals(order.getStatus(), findResult.getStatus());
     }
 
-    // happy path test: Use save to update an Order
     @Test
     void testSaveUpdate() {
         Order order = orders.get(1);
@@ -73,7 +71,6 @@ class OrderRepositoryTest {
         assertEquals(OrderStatus.SUCCESS.getValue(), findResult.getStatus());
     }
 
-    // happy path test: Use findById to find Order using a valid ID
     @Test
     void testFindByIdIfIdFound() {
         for (Order order : orders) {
@@ -87,7 +84,6 @@ class OrderRepositoryTest {
         assertEquals(orders.get(1).getStatus(), findResult.getStatus());
     }
 
-    // unhappy path test: Use findById to find Order using an ID that is never used
     @Test
     void testFindByIdIfIdNotFound() {
         for (Order order : orders) {
@@ -98,7 +94,6 @@ class OrderRepositoryTest {
         assertNull(findResult);
     }
 
-    // happy path test: Use findAllByAuthor to find Order using a valid author name
     @Test
     void testFindAllByAuthorIfAuthorCorrect() {
         for (Order order : orders) {
@@ -110,13 +105,18 @@ class OrderRepositoryTest {
         assertEquals(2, orderList.size());
     }
 
-    // findAllByAuthor to find Order using an all-lowercase name
     @Test
     void testFindAllByAuthorIfAllLowercase() {
         orderRepository.save(orders.get(1));
 
         List<Order> orderList = orderRepository.findAllByAuthor(
                 orders.get(1).getAuthor().toLowerCase());
+        assertTrue(orderList.isEmpty());
+    }
+
+    @Test
+    void testFindAllByAuthorIfRepositoryEmpty() {
+        List<Order> orderList = orderRepository.findAllByAuthor("Safira Sudrajat");
         assertTrue(orderList.isEmpty());
     }
 }

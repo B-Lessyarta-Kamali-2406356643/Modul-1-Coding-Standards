@@ -180,3 +180,57 @@ Contoh: Kalau semua logic ditaruh di satu tempat, menambah fitur seperti “filt
 e) Kode jadi “besar dan gemuk” (melanggar ISP)
 
 Contoh: Kalau ada satu interface/service besar untuk semua hal (product + car + lainnya), nanti class yang hanya butuh sebagian fitur tetap dipaksa implement banyak method yang tidak dipakai.
+
+# Module 4 Reflection
+
+1. Refleksi terhadap alur TDD
+
+Menurut saya, alur Test-Driven Development (TDD) pada latihan ini sangat bermanfaat karena membantu saya membangun fitur secara bertahap dan lebih terarah. 
+Dengan memulai dari test, saya jadi lebih memahami perilaku yang diharapkan dari setiap class dan method sebelum menulis implementasinya. 
+Proses red-green-refactor juga membantu saya memecah masalah besar menjadi langkah-langkah yang lebih kecil, sehingga lebih mudah mengecek apakah perubahan yang saya lakukan sudah benar atau belum.
+
+Jika dikaitkan dengan pertanyaan reflektif dari Percival (2017), TDD dalam latihan ini membantu saya menjawab beberapa hal penting yaitu apa yang sebenarnya ingin diuji, apakah test tersebut benar-benar merepresentasikan kebutuhan sistem, dan apakah implementasi yang dibuat memenuhi kebutuhan tersebut. 
+Saya merasa TDD membuat saya lebih fokus pada tujuan testing, bukan hanya sekadar membuat kode berjalan.
+
+Namun, saya juga menyadari bahwa alur TDD ini belum sepenuhnya optimal ketika saya masih kurang teliti pada detail teknis seperti import, package, atau dependensi. 
+Dalam beberapa kasus, test gagal bukan karena logika bisnis yang salah, tetapi karena masalah struktur file atau referensi class yang belum benar. 
+Hal ini menunjukkan bahwa selain memahami konsep TDD, saya juga perlu lebih rapi dalam menyiapkan environment pengujian.
+
+Ke depannya, saat membuat test lagi, saya perlu:
+1. Memastikan struktur package, import, dan dependency sudah benar sejak awal
+2. Menulis test yang lebih kecil dan spesifik agar lebih mudah melacak sumber error
+3. Membedakan dengan jelas antara compile error, failing test, dan logic error
+4. Melakukan refactor setelah semua test hijau agar kode tetap bersih dan mudah dipelihara
+
+Secara keseluruhan, saya menilai TDD bermanfaat karena membantu saya berpikir dari sudut pandang kebutuhan sistem dan meningkatkan kepercayaan diri saat melakukan perubahan pada kode.
+
+2. Refleksi terhadap prinsip F.I.R.S.T.
+
+Menurut saya, sebagian besar unit test yang saya buat sudah cukup mengikuti prinsip F.I.R.S.T., walaupun masih ada beberapa hal yang bisa ditingkatkan.
+
+- **Fast**  
+Test yang dibuat tergolong cepat dijalankan karena mayoritas berupa unit test sederhana tanpa akses database atau jaringan. Ini sesuai dengan prinsip fast, karena feedback dapat diperoleh dengan cepat.
+
+- **Independent**  
+Sebagian besar test juga sudah independen karena setiap test menyiapkan data sendiri melalui `setUp()` dan tidak bergantung pada urutan eksekusi test lain. Ini penting agar hasil test tetap konsisten.
+
+*- *Repeatable**  
+Test dapat dijalankan berulang kali dengan hasil yang sama selama environment dan kode tidak berubah. Dalam hal ini, test cukup repeatable. Meski begitu, saya sempat mengalami masalah pada import dan struktur package, yang menunjukkan bahwa repeatability juga dipengaruhi oleh kerapian setup project.
+
+- **Self-Validating**  
+Test yang dibuat sudah self-validating karena menggunakan assertion. Artinya, hasil test bisa langsung menunjukkan pass atau fail tanpa perlu pengecekan manual.
+
+- **Timely**  
+Prinsip timely juga cukup terpenuhi karena test dibuat sebelum atau bersamaan dengan implementasi, terutama dalam alur TDD. Saya menulis test terlebih dahulu, lalu membuat implementasi minimum agar test lolos.
+
+Walaupun demikian, saya merasa masih ada beberapa kekurangan. 
+Beberapa test masih cukup dekat dengan detail implementasi dan belum sepenuhnya menekankan perilaku dari sudut pandang kebutuhan. 
+Selain itu, saya juga masih perlu meningkatkan konsistensi penamaan test agar lebih jelas menggambarkan skenario yang diuji.
+
+Ke depannya, agar lebih sesuai dengan prinsip F.I.R.S.T., saya perlu:
+1. Menjaga test tetap sederhana dan fokus pada satu perilaku saja
+2. Menghindari error teknis non-logika seperti import atau package mismatch
+3. Menulis nama test yang lebih deskriptif dan konsisten
+4. Memastikan test benar-benar dibuat sebelum implementasi, bukan setelahnya
+
+Secara umum, saya dapat menyimpulkan bahwa test yang saya buat sudah cukup mengikuti prinsip F.I.R.S.T., tetapi masih ada ruang perbaikan agar test menjadi lebih rapi, lebih jelas, dan lebih kuat dalam memvalidasi perilaku sistem.

@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.eshop.controller;
 
 import id.ac.ui.cs.advprog.eshop.model.Order;
 import id.ac.ui.cs.advprog.eshop.model.Payment;
+import id.ac.ui.cs.advprog.eshop.model.Product;
 import id.ac.ui.cs.advprog.eshop.service.OrderService;
 import id.ac.ui.cs.advprog.eshop.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/order")
@@ -29,6 +28,31 @@ public class OrderController {
     @GetMapping("/create")
     public String createOrderPage() {
         return "createOrder";
+    }
+
+    @PostMapping("/create")
+    public String createOrderPost(@RequestParam("author") String author,
+                                  @RequestParam("productName") String productName,
+                                  @RequestParam("productQuantity") int productQuantity,
+                                  Model model) {
+        Product product = new Product();
+        product.setProductId(UUID.randomUUID().toString());
+        product.setProductName(productName);
+        product.setProductQuantity(productQuantity);
+
+        List<Product> products = new ArrayList<>();
+        products.add(product);
+
+        Order order = new Order(
+                UUID.randomUUID().toString(),
+                products,
+                System.currentTimeMillis(),
+                author
+        );
+
+        orderService.createOrder(order);
+        model.addAttribute("createdOrder", order);
+        return "redirect:/order/history";
     }
 
     @GetMapping("/history")
@@ -59,10 +83,17 @@ public class OrderController {
                            @RequestParam(value = "deliveryFee", required = false) String deliveryFee,
                            Model model) {
         Order order = orderService.findById(orderId);
-        Map<String, String> paymentData = buildPaymentData(method, voucherCode, address, deliveryFee);
 
+        if (order == null) {
+            model.addAttribute("errorMessage", "Order not found.");
+            return "paymentCreated";
+        }
+
+        Map<String, String> paymentData = buildPaymentData(method, voucherCode, address, deliveryFee);
         Payment payment = paymentService.addPayment(order, method, paymentData);
+
         model.addAttribute("payment", payment);
+        model.addAttribute("order", order);
         return "paymentCreated";
     }
 

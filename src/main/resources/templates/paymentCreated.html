@@ -1,12 +1,106 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Payment Created</title>
+    <title>Payment Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 60px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 30px;
+        }
+
+        .success-box, .error-box {
+            border-radius: 14px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+
+        .success-box {
+            background: #ecfdf5;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .meta {
+            margin: 10px 0;
+        }
+
+        .actions {
+            margin-top: 24px;
+        }
+
+        .btn-link {
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary:hover {
+            background: #1d4ed8;
+        }
+
+        .secondary {
+            background: #eef2ff;
+            color: #1d4ed8;
+        }
+
+        .secondary:hover {
+            background: #e0e7ff;
+        }
+    </style>
 </head>
 <body>
-<h1>Payment Created</h1>
-<p th:text="'Payment ID: ' + ${payment.id}"></p>
-<p th:text="'Method: ' + ${payment.method}"></p>
-<p th:text="'Status: ' + ${payment.status}"></p>
+<div class="container">
+    <h1>Payment Result</h1>
+
+    <div th:if="${errorMessage != null}" class="error-box">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div th:if="${payment != null}" class="success-box">
+        <p class="meta"><strong>Payment Status:</strong> <span th:text="${payment.status}"></span></p>
+        <p class="meta"><strong>Method:</strong> <span th:text="${payment.method}"></span></p>
+        <p class="meta" th:if="${order != null}">
+            <strong>Order ID:</strong> <span th:text="${order.id}"></span>
+        </p>
+        <p class="meta" th:if="${order != null}">
+            <strong>Order Status:</strong> <span th:text="${order.status}"></span>
+        </p>
+    </div>
+
+    <div class="actions">
+        <a class="btn-link secondary" th:href="@{/order/history}">Back to History</a>
+        <a class="btn-link primary" th:href="@{/order/create}">Create Another Order</a>
+    </div>
+</div>
 </body>
 </html>

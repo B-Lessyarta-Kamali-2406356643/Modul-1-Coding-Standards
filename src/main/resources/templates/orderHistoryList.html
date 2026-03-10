@@ -2,12 +2,129 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Order History List</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 50px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 26px;
+        }
+
+        .empty-state {
+            padding: 24px;
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            border-radius: 14px;
+            color: #6b7280;
+        }
+
+        .order-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: #fbfdff;
+        }
+
+        .order-card h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .meta {
+            margin: 6px 0;
+            color: #4b5563;
+        }
+
+        .product-list {
+            margin-top: 10px;
+            padding-left: 18px;
+        }
+
+        .pay-link, .back-link {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .pay-link {
+            background: #2563eb;
+            color: white;
+        }
+
+        .pay-link:hover {
+            background: #1d4ed8;
+        }
+
+        .back-link {
+            background: #eef2ff;
+            color: #1d4ed8;
+            margin-right: 10px;
+        }
+
+        .back-link:hover {
+            background: #e0e7ff;
+        }
+
+        .actions {
+            margin-top: 24px;
+        }
+    </style>
 </head>
 <body>
-<h1>Order History List</h1>
-<p th:text="${author}"></p>
-<ul>
-    <li th:each="order : ${orders}" th:text="${order.id}"></li>
-</ul>
+<div class="container">
+    <h1>Order History</h1>
+    <p class="subtitle" th:text="'Showing orders for author: ' + ${author}"></p>
+
+    <div th:if="${orders == null or #lists.isEmpty(orders)}" class="empty-state">
+        No orders found for this author.
+    </div>
+
+    <div th:if="${orders != null and !#lists.isEmpty(orders)}">
+        <div class="order-card" th:each="order : ${orders}">
+            <h3 th:text="'Order ID: ' + ${order.id}"></h3>
+            <p class="meta" th:text="'Author: ' + ${order.author}"></p>
+            <p class="meta" th:text="'Status: ' + ${order.status}"></p>
+            <p class="meta" th:text="'Order Time: ' + ${order.orderTime}"></p>
+
+            <div>
+                <strong>Products:</strong>
+                <ul class="product-list">
+                    <li th:each="product : ${order.products}"
+                        th:text="${product.productName} + ' (Qty: ' + ${product.productQuantity} + ')'">
+                    </li>
+                </ul>
+            </div>
+
+            <a class="pay-link" th:href="@{/order/pay/{orderId}(orderId=${order.id})}">Pay This Order</a>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a class="back-link" th:href="@{/order/history}">Search Again</a>
+        <a class="back-link" th:href="@{/order/create}">Create New Order</a>
+    </div>
+</div>
 </body>
 </html>

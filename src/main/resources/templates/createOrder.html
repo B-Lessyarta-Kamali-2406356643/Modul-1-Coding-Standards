@@ -2,8 +2,115 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Create Order</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 60px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 32px;
+        }
+
+        p.subtitle {
+            color: #6b7280;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .link-row {
+            margin-top: 18px;
+        }
+
+        .link-row a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-row a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h1>Create Order</h1>
+<div class="container">
+    <h1>Create Order</h1>
+    <p class="subtitle">Create a simple order with one product, then check it in order history.</p>
+
+    <form th:action="@{/order/create}" method="post">
+        <div class="form-group">
+            <label for="author">Author</label>
+            <input type="text" id="author" name="author" placeholder="Enter author name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="productName">Product Name</label>
+            <input type="text" id="productName" name="productName" placeholder="Enter product name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="productQuantity">Product Quantity</label>
+            <input type="number" id="productQuantity" name="productQuantity" min="1" placeholder="Enter quantity" required>
+        </div>
+
+        <button class="btn" type="submit">Create Order</button>
+    </form>
+
+    <div class="link-row">
+        <a th:href="@{/order/history}">Go to Order History</a>
+    </div>
+</div>
 </body>
 </html>
